@@ -1,110 +1,90 @@
 # githubworkshop
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//structure for taking input from user about diseases Pranav Gawande
+
+// Constants
 #define MAX_DISEASES 100
 #define MAX_SYMPTOMS 3
 #define MAX_USERS 50
-typedef struct{
+
+// Structures
+typedef struct {
     char name[50];
-    char symptoms[50];
+    char symptoms[MAX_SYMPTOMS][50];
     char prevention[200];
-    char severity[10];
-    char remedy[200];
+    char severity[10]; // "normal" or "risky"
+    char remedy[200];  // Homemade remedy or advice
+} Disease;
 
-      } Disease;
-//structure for taking input of user's profile Pranav Gawande
-typedef struct{
-    char name[50];
-    int age;
-    char gender[10];
-    char searchHistory[5][100]; // Last 5 searches
-    int historyCount;
 
-      } Userprofile;
-//Global Variables
+
+// Global variables
 Disease diseases[MAX_DISEASES];
-Userprofile users[MAX_USERS];
-int diseaseCount = 0, usercount=0;
-//Functions Declaration
-void displaymenu();
-//void searchBySymptoms();
-//void viewAllDiseases();
-//void createUserProfile();
-//void viewSearchHistory();
-//void displayHealthTips();
+int diseaseCount = 0;
+
+// Function declarations
+void displayMenu();
+void checkTemperature();
+void searchBySymptoms();
+void viewAllDiseases();
 void cureDisease();
-//void loadData();
-//void saveData();
-void initializeDiseases();
+void storedDiseases();
+void loadData();
+void saveData();
+
 int main() {
     int choice;
-    initializeDiseases();
 
-    printf("*Welcome to our DISEASE MANAGEMENT SYSTEM....");
-    printf("\n-------------------------------------");
-    printf("\n==== Disease Management System ====\n");
-    printf("-------------------------------------\n");
-    printf("\n\nHow can we help you?\n\n");
-    displaymenu();
-    printf("\n\nEnter any choice number to start conversation.");
-    scanf("%d",&choice);
+    // stored diseases
+    storedDiseases();
 
-    switch (choice){
+
+    while (1) {
+        displayMenu();
+        printf("\nEnter your choice: ");
+        scanf("%d", &choice);
+        getchar(); // Clear input buffer
+
+        switch (choice) {
+
             case 1:
-                searchbysymptoms();
+                checkTemperature();
                 break;
             case 2:
-                viewAllDiseases();
+                searchBySymptoms();
                 break;
             case 3:
-                createUserProfile();
+                viewAllDiseases();
                 break;
             case 4:
                 cureDisease();
                 break;
             case 5:
                 printf("Exiting the program. Goodbye!\n");
-
+                exit(0);
             default:
                 printf("Invalid choice! Please try again.\n");
-
+        }
     }
-
 
     return 0;
 }
-void displaymenu(){
-    printf("1. Search for diseases by symptoms\n");
-    printf("2. View all diseases\n");
-    printf("3. Create or view user profile\n");
-    printf("4. View search history\n");
-    printf("5. Get health tips\n");
-    printf("6. Cure a disease\n");
-    printf("7. Exit\n");
-}
-void viewAllDiseases(){
-     printf("\n<<<<<<< List of All Diseases >>>>>>>");
-     for (int i = 0; i < diseaseCount; i++) {
-        printf("\nDisease: %s\n", diseases[i].name);
-        printf("Symptoms: ");
-        for (int j = 0; j < MAX_SYMPTOMS; j++) {
-            printf("%s", diseases[i].symptoms[j]);
-            if (j < MAX_SYMPTOMS - 1) printf(", ");
-        }
-        printf("\nPrevention: %s\n", diseases[i].prevention);
-        printf("Severity: %s\n", diseases[i].severity);
-    }
 
-}
-void inittializeDiseases()
-{
+// Function to display the menu
+void displayMenu() {
+    printf("\n Welcome to our disease management system.......\n");
 
+    printf("\n<<<<<<< Disease Management System >>>>>>>\n");
+    printf("1. Check Your Body Temperature\n");
+    printf("2. Search for diseases by symptoms\n");
+    printf("3. View all diseases\n");
+    printf("4. Cure a disease\n");
+    printf("5. Exit\n");
+}
+
+// Function to initialize a list of diseases
+void storedDiseases() {
     // Example diseases
     // Disease 1: Common Cold
     strcpy(diseases[0].name, "Common Cold");
@@ -548,28 +528,31 @@ void inittializeDiseases()
 
     diseaseCount = 40;
 }
-void searchbysymptoms()
-{
-   char usersymptoms[MAX_SYMPTOMS][50];
-   printf("\nEnter 3 symptoms search a disease:\n");
-   for (int i=0; i < MAX_SYMPTOMS; i++){
-    printf("Symptom %d:",i+1);
-    fgets(usersymptoms[i], sizeof(usersymptoms[i]), stdin);
-        usersymptoms[i][strcspn(usersymptoms[i], "\n")] = '\0';
 
-   }
-   int found = 0;
-   printf("\n<<<<<<< Search Results >>>>>>>\n");
-   for (int i = 0; i < diseaseCount; i++) {
+
+
+// Function to search diseases by symptoms
+void searchBySymptoms() {
+    char userSymptoms[MAX_SYMPTOMS][50];
+    printf("\nEnter 3 symptoms to search:\n");
+    for (int i = 0; i < MAX_SYMPTOMS; i++) {
+        printf("Symptom %d: ", i + 1);
+        fgets(userSymptoms[i], sizeof(userSymptoms[i]), stdin);
+        userSymptoms[i][strcspn(userSymptoms[i], "\n")] = '\0';
+    }
+
+    int found = 0;
+    printf("\n=== Search Results ===\n");
+    for (int i = 0; i < diseaseCount; i++) {
         int matchCount = 0;
         for (int j = 0; j < MAX_SYMPTOMS; j++) {
             for (int k = 0; k < MAX_SYMPTOMS; k++) {
-                if (strcasecmp(usersymptoms[j], diseases[i].symptoms[k]) == 0) {
+                if (strcasecmp(userSymptoms[j], diseases[i].symptoms[k]) == 0) {
                     matchCount++;
                 }
             }
         }
-    if (matchCount > 0) {
+        if (matchCount > 0) {//match is for the ease of user to know the exact disease
             found = 1;
             printf("\nDisease: %s\n", diseases[i].name);
             printf("Prevention: %s\n", diseases[i].prevention);
@@ -582,13 +565,30 @@ void searchbysymptoms()
     }
 }
 
+// Function to view all diseases
+void viewAllDiseases() {
+    printf("\n=== List of Diseases ===\n");
+    for (int i = 0; i < diseaseCount; i++) {
+        printf("\nDisease: %s\n", diseases[i].name);
+        printf("Symptoms: ");
+        for (int j = 0; j < MAX_SYMPTOMS; j++) {
+            printf("%s", diseases[i].symptoms[j]);
+            if (j < MAX_SYMPTOMS - 1) printf(", ");
+        }
+        printf("\nPrevention: %s\n", diseases[i].prevention);
+        printf("Severity: %s\n", diseases[i].severity);
+    }
+}
 
 
-void cureDisease(){
+
+// Function to provide a cure for diseases
+void cureDisease() {
     char diseaseName[50];
     printf("\nEnter the disease name: ");
     fgets(diseaseName, sizeof(diseaseName), stdin);
     diseaseName[strcspn(diseaseName, "\n")] = '\0';
+
     int found = 0;
     for (int i = 0; i < diseaseCount; i++) {
         if (strcasecmp(diseases[i].name, diseaseName) == 0) {
@@ -601,9 +601,26 @@ void cureDisease(){
             }
             break;
         }
-        if (!found) {
+    }
+
+    if (!found) {
         printf("Disease not found in the database.\n");
     }
- }
+}
+void checkTemperature() {
+ float temperature;
+    printf("Enter your body temperature in Celsius:");
+    scanf("%f",&temperature);
+    if(temperature< 35.0 ){
+        printf("\n Body temperature is too low.\n");
+    }else if( temperature >= 35.0 && temperature <= 37.2 ){
+        printf("\n Body temperature is normal.\n");
+    }else{
+        printf("\n Body temperature is above normal.\n");
+    }
 
 }
+
+
+
+
